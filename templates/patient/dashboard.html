@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - OptiQueue</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>OptiQueue - Smart OPD Queue Management</h1>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Patient Dashboard</h2>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+        </div>
+        
+        <div class="card">
+            <h3>Welcome, Patient!</h3>
+            <p>This is your patient dashboard. Here you will be able to:</p>
+            <ul>
+                <li>View your appointment schedule</li>
+                <li>Check your queue position</li>
+                <li>Receive notifications about your turn</li>
+                <li>Access your medical history</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Auth Guard -->
+    <script type="module">
+        import { auth } from '/static/js/firebase_config.js';
+        import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import '/static/js/auth_guard.js'; // This will redirect if not authenticated
+        
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = '/auth/login';
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        });
+    </script>
+</body>
+</html>

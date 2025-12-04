@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OptiQueue</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>OptiQueue - Smart OPD Queue Management</h1>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                
+                <button type="submit" class="btn">Login</button>
+                <p>Don't have an account? <a href="/auth/register">Register here</a></p>
+            </form>
+            
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { auth, db } from '/static/js/firebase_config.js';
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Clear previous messages
+            document.getElementById('message').innerHTML = '';
+            
+            try {
+                // Sign in with Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Get user role from Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const role = userData.role;
+                    
+                    showMessage('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        if (role === 'patient') {
+                            window.location.href = '/patient/dashboard';
+                        } else {
+                            window.location.href = '/staff/dashboard';
+                        }
+                    }, 2000);
+                } else {
+                    showMessage('User data not found!', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error during login:', error);
+                showMessage(error.message, 'error');
+            }
+        });
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            if (type === 'error') {
+                messageDiv.innerHTML = `<p class="error-message">${message}</p>`;
+            } else {
+                messageDiv.innerHTML = `<p class="success-message">${message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
